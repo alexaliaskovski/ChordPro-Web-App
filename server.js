@@ -1,10 +1,7 @@
 /*
 
-	Alexandra Liaskovski-Balaba
-	101071309
-	alexandraliaskovskib@cmail.carleton.ca
+	Alexa Liaskovski
 	
-	COMP2406 - Assignment #1
 	server.js
 	4th October 2018, 10pm
 	
@@ -20,6 +17,7 @@ const songs = {
 	"Riptide": 'songs/riptide.txt'
 };
 
+//Provided Code *******************************************************************************
 //Server Code
 const http = require("http"); //need to http
 const fs = require("fs"); //need to read static files
@@ -80,11 +78,13 @@ http.createServer(function(request, response) {
 		
         console.log("USER REQUEST: " + dataObj.text)
         var returnObj = {}
+		//Modified from provided code ******************************************************************************
 		//if the text input matches an index in the songs map, return a string array of the content in the text file
 		if (songs[dataObj.text]){
 			// no string formatting here, data is passed as one long string in an array
 			returnObj.wordArray = fs.readFileSync(songs[dataObj.text], "utf8")
 		}
+	      	//**********************************************************************************************************
 
         //object to return to client
         response.writeHead(200, { "Content-Type": MIME_TYPES["txt"] })

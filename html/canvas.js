@@ -1,10 +1,7 @@
 /*
 
-	Alexandra Liaskovski-Balaba
-	101071309
-	alexandraliaskovskib@cmail.carleton.ca
-	
-	COMP2406 - Assignment #1
+	Alexa Liaskovski
+
 	canvas.js
 	4th October 2018, 10pm
 	
@@ -150,31 +147,36 @@ function drawCanvas() {
 //handles when mouse is pressed down
 function handleMouseDown(e) {
 
+	//Provided Code ***********************************************************
 	//get mouse location relative to canvas top left
 	let rect = canvas.getBoundingClientRect()
 	let canvasX = e.pageX - rect.left //use jQuery event object pageX and pageY
 	let canvasY = e.pageY - rect.top
-
+	//**************************************************************************
+	
 	//determines which word was clicked
 	wordBeingMoved = getWordAtLocation(canvasX, canvasY)
 	originalWord = getWordAtLocation(canvasX, canvasY)
+	
+	//Provided Code ***********************************************************
 	if (wordBeingMoved != null) {
 		deltaX = wordBeingMoved.x - canvasX
 		deltaY = wordBeingMoved.y - canvasY
 		$("#canvas1").mousemove(handleMouseMove)	//if a word was clicked, listen for dragging...
 		$("#canvas1").mouseup(handleMouseUp)		//... and letting go of the word
-
 	}
 	
 	e.stopPropagation()
 	e.preventDefault()
-
+	//**************************************************************************
+	
 	drawCanvas()
 }
 
 //handle when mouse is being moved
 function handleMouseMove(e) {
-
+	
+	//Provided Code ***********************************************************
 	//get mouse location relative to canvas top left
 	let rect = canvas.getBoundingClientRect()
 	let canvasX = e.pageX - rect.left
@@ -182,6 +184,7 @@ function handleMouseMove(e) {
 
 	wordBeingMoved.x = canvasX + deltaX
 	wordBeingMoved.y = canvasY + deltaY
+	//*************************************************************************
 	
 	//find which word is being moved, and update its location
 	for (let i = 0; i < words.length; i++) {
@@ -194,11 +197,12 @@ function handleMouseMove(e) {
 		}
 	}	
 
-	e.stopPropagation()
+	e.stopPropagation() //Provided
 
 	drawCanvas()
 }
 
+//Provided Code ***********************************************************
 //handles when user lets go of the word
 function handleMouseUp(e) {
 
@@ -210,7 +214,9 @@ function handleMouseUp(e) {
 
 	drawCanvas() //redraw the canvas
 }
+//**************************************************************************
 
+//Provided Code ************************************************************
 //handles when the user submits a new song
 function handleSubmitButton() {
 
@@ -221,10 +227,11 @@ function handleSubmitButton() {
 		let userRequestJSON = JSON.stringify(userRequestObj) //make JSON string
 		$('#userTextField').val('') //clear the user text field
 		$.post("userText", userRequestJSON, function(data, status) {
+			//***********************************************************
 			let textDiv = document.getElementById("text-area")
 			document.getElementById("text-area").innerHTML = ""	//clear existing lyrics in HTML
 			
-			let responseObj = JSON.parse(data)
+			let responseObj = JSON.parse(data)// Provided
 			//replace word array with new words if there are any
 			if (responseObj.wordArray) {
 				let lyrics = simpleParseLyrics(responseObj.wordArray)

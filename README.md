@@ -1,17 +1,14 @@
 # ChordPro-Web-App
 A web application created as an assignment for a web application class. Comments denote unoriginal code.
 
-/*
+
 
 	Alexa Liaskovski
 	
-	COMP2406 - Assignment #1
-	server.js
-	4th October 2018, 10pm
+	Chord Pro Web App
+	4th October 2018
 	
-	Testing: The page can be found at http://localhost:3000/assignment1.html in the browser
-	
-*/
+
 
 Files:			server.js
 				html/assignment1.html

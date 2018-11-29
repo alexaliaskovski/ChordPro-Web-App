@@ -1,11 +1,14 @@
 /*
 
-	Alexa Liaskovski
-
-	canvas.js
-	4th October 2018, 10pm
+	Alexandra Liaskovski-Balaba
+	101071309
+	alexandraliaskovskib@cmail.carleton.ca
 	
-	Testing: The page can be found at http://localhost:3000/assignment1.html in the browser
+	COMP2406 - Assignment #2
+	canvas.js
+	18th October 2018, 10pm
+	
+	Testing: The page can be found at http://localhost:3000/assignment2.html in the browser
 	
 */
 
@@ -17,7 +20,6 @@ let deltaX, deltaY //location where mouse is pressed
 const canvas = document.getElementById('canvas1') //our drawing canvas
 const transposeUp = ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"] //order of chords when transposing up
 const transposeDown = ["A", "Bb", "B", "C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab"] //order of chords when transposing down (transpose down = move down one index)
-
 
 //used to string format lyrics sent from server in order to populate HTML
 function simpleParseLyrics(unparsed) {
@@ -73,7 +75,7 @@ function initWordLoc(wordArray) {
 	let width =  10	//width of a space
 	let height = 25	//height of a line
 	let nextX = 100	//location of the next x-value
-	let nextY = 50	//location of the next y-value
+	let nextY = 25	//location of the next y-value
 		
 	for (let section of wordArray) {	//for each line of the parsed lyrics (2D Array)
 		for (let line of section) {		// for each section of each line (either a string of the chords or of the lyrics)
@@ -147,36 +149,31 @@ function drawCanvas() {
 //handles when mouse is pressed down
 function handleMouseDown(e) {
 
-	//Provided Code ***********************************************************
 	//get mouse location relative to canvas top left
 	let rect = canvas.getBoundingClientRect()
 	let canvasX = e.pageX - rect.left //use jQuery event object pageX and pageY
 	let canvasY = e.pageY - rect.top
-	//**************************************************************************
-	
+
 	//determines which word was clicked
 	wordBeingMoved = getWordAtLocation(canvasX, canvasY)
 	originalWord = getWordAtLocation(canvasX, canvasY)
-	
-	//Provided Code ***********************************************************
 	if (wordBeingMoved != null) {
 		deltaX = wordBeingMoved.x - canvasX
 		deltaY = wordBeingMoved.y - canvasY
 		$("#canvas1").mousemove(handleMouseMove)	//if a word was clicked, listen for dragging...
 		$("#canvas1").mouseup(handleMouseUp)		//... and letting go of the word
+
 	}
 	
 	e.stopPropagation()
 	e.preventDefault()
-	//**************************************************************************
-	
+
 	drawCanvas()
 }
 
 //handle when mouse is being moved
 function handleMouseMove(e) {
-	
-	//Provided Code ***********************************************************
+
 	//get mouse location relative to canvas top left
 	let rect = canvas.getBoundingClientRect()
 	let canvasX = e.pageX - rect.left
@@ -184,7 +181,6 @@ function handleMouseMove(e) {
 
 	wordBeingMoved.x = canvasX + deltaX
 	wordBeingMoved.y = canvasY + deltaY
-	//*************************************************************************
 	
 	//find which word is being moved, and update its location
 	for (let i = 0; i < words.length; i++) {
@@ -197,12 +193,11 @@ function handleMouseMove(e) {
 		}
 	}	
 
-	e.stopPropagation() //Provided
+	e.stopPropagation()
 
 	drawCanvas()
 }
 
-//Provided Code ***********************************************************
 //handles when user lets go of the word
 function handleMouseUp(e) {
 
@@ -214,24 +209,22 @@ function handleMouseUp(e) {
 
 	drawCanvas() //redraw the canvas
 }
-//**************************************************************************
 
-//Provided Code ************************************************************
 //handles when the user submits a new song
 function handleSubmitButton() {
 
 	let userText = $('#userTextField').val(); //get text from user text input field
 	if (userText && userText != '') { //user text was not empty
-		let userRequestObj = {text: userText} //make object to send to server
+		userText = userText.toLowerCase()
+		let userRequestObj = {text: userText, request: "Submit", content: "uhph"} //make object to send to server
 		
 		let userRequestJSON = JSON.stringify(userRequestObj) //make JSON string
 		$('#userTextField').val('') //clear the user text field
 		$.post("userText", userRequestJSON, function(data, status) {
-			//***********************************************************
 			let textDiv = document.getElementById("text-area")
 			document.getElementById("text-area").innerHTML = ""	//clear existing lyrics in HTML
 			
-			let responseObj = JSON.parse(data)// Provided
+			let responseObj = JSON.parse(data)
 			//replace word array with new words if there are any
 			if (responseObj.wordArray) {
 				let lyrics = simpleParseLyrics(responseObj.wordArray)
@@ -248,28 +241,79 @@ function handleSubmitButton() {
 	}
 }
 
-//handle when the user wants to transpose up
-function handleTransposeUp() {
-	if (words) {	//if there exists words on the canvas
-		for (let i = 0; i < words.length; i ++) {//loop through each line
-			for (let j = 0; j < words[i].length; j++) {//loop through each word
-				if (i % 2 == 0) {//only consider lines with chords
-					for (let k = 0; k < transposeUp.length; k++) { //loop through transpose up array
-						if (words[i][j].word == transposeUp[k]) {
-							if (k + 1 == 12) {	//if we reached the end of the array, loop back to the beginning
-								words[i][j].word = transposeUp[0] 
-								break
-							}
-							else {
-								k += 1
-								words[i][j].word = transposeUp[k] 
-								break
-							}
-						}
+function helperTranspose(direc, transArray, otherArray, root, tail) {
+	if (transArray.includes(root)) {
+		index = transArray.indexOf(root)
+		if (direc == "up") {
+			if (index == 11) {index = 0}
+			else {index += 1}
+		}
+		else if (direc == "down") {
+			if (index == 0) {index = 11}
+			else {index -= 1}
+		}
+		return transArray[index]
+	}
+	else if (otherArray.includes(root)) {
+		index = otherArray.indexOf(root)
+		if (direc == "up") {
+			if (index == 11) {index = 0}
+			else {index += 1}
+		}
+		else if (direc == "down") {
+			if (index == 0) {index = 11}
+			else {index -= 1}
+		}
+		return otherArray[index]
+	}
+}
+
+function findRoot(word) {
+	let root = ""
+	let tail = ""
+	for (let letter = 0; letter < word.length; letter++) {
+		if ("ABCDEFG".includes(word[letter])) {root += word[letter]}
+		else if ("b#".includes(word[letter])) {root += word[letter]}
+		else (tail += word[letter])
+	}
+	return [root, tail]
+}
+
+function transpose(direc) {
+	if (direc == "up") {
+		transArray = transposeUp
+		otherArray = transposeDown}
+	else if (direc == "down") {
+		transArray = transposeDown
+		otherArray = transposeUp}
+	else {console.log("Transpose Error 1")}
+	
+	for (let i = 0; i < words.length; i ++) {	//loop through each line
+		if (i % 2 == 0) { //only consider lines with chords
+			let counter = 1
+			for (let j = 0; j < words[i].length; j++) {	//loop through each word
+				if (words[i][j].word.includes("/")){
+					chordHalves = words[i][j].word.split("/")
+					for (let half = 0; half < 2; half++) {
+						chordHalves[half] = findRoot(chordHalves[half])
+						chordHalves[half] = helperTranspose(direc, transArray, otherArray, chordHalves[half][0], chordHalves[half][1])
 					}
+					words[i][j].word = chordHalves[0] + "/" + chordHalves[1]
+				}
+				else {
+					part = findRoot(words[i][j].word)
+					newRoot = helperTranspose(direc, transArray, otherArray, part[0], part[1])
+					words[i][j].word = newRoot + part[1]
 				}
 			}
 		}
+	}
+}
+
+//handle when the user wants to transpose up
+function handleTransposeUp() {
+	if (words) {	//if lyrics exist on the canvas
+		transpose("up")
 		drawCanvas()
 	}
 }
@@ -277,28 +321,111 @@ function handleTransposeUp() {
 //handles when user wants to transpose down
 function handleTransposeDown() {
 	if (words) {	//if lyrics exist on the canvas
-		for (let i = 0; i < words.length; i ++) {	//loop through each line
-			for (let j = 0; j < words[i].length; j++) {	//loop through each word
-				if (i % 2 == 0) {	//only consider lines with chords
-					for (let k = 0; k < transposeDown.length; k++) {	//loop through each chord in transpose down
-						if (words[i][j].word == transposeDown[k]) {
-							if (k - 1 == -1) {	//if we're at the beginning of chords array, loop to end
-								words[i][j].word = transposeUp[11] 
-								break
-							}
-							else {
-								k -= 1
-								words[i][j].word = transposeDown[k] 
-								break
-							}
-						}
-					}
-				}
-			}
-		}
+		transpose("down")
 		drawCanvas()
 	}
 }
+
+function reorderWordArray() {
+	let newWords = []
+	for (let i = 25; i < canvas.height; i+=25) {
+		let newLine = []
+		for (let j = 0; j < words.length; j ++) {
+			for (let k = 0; k < words[j].length; k++) {
+				if (words[j][k].y == i) {
+					newLine.push(words[j][k])
+				}
+			}
+		}
+		newLine.sort(function(wordA, wordB) {
+			if(wordA.x < wordB.x) return -1
+			if(wordA.x == wordB.x) return 0
+			if(wordA.x > wordB.x) return 1
+		})
+		newWords.push(newLine)
+	}
+	words = newWords
+}
+  
+function wordArrayToString() {
+	let string = ""
+	for (let i = 0; i < words.length - 1; i+=2) {	//loop through each line
+		let tempChords = words[i]
+		let tempWords = words[i + 1]
+		let chordsCounter = 0
+		let wordsCounter = 0
+		console.log(tempChords)
+		while (chordsCounter < tempChords.length || wordsCounter < tempWords.length) {
+			if (chordsCounter < tempChords.length && wordsCounter < tempWords.length) {
+				if (tempChords[chordsCounter].x <= tempWords[wordsCounter].x) { 
+					string += "[" + tempChords[chordsCounter].word + "] "
+					chordsCounter += 1
+				}
+				else if (tempWords[wordsCounter].x < tempChords[chordsCounter].x) {
+					string += tempWords[wordsCounter].word + " "
+					wordsCounter += 1
+				}
+				else {break}
+			}
+			else if (chordsCounter < tempChords.length) {
+				console.log("2")
+				string += "[" + tempChords[chordsCounter].word + "] "
+				chordsCounter += 1
+			}
+			else if (wordsCounter < tempWords.length) {
+				console.log("3")
+				string += tempWords[wordsCounter].word + " "
+				wordsCounter += 1
+			}
+			else {break}
+		}
+		string += "\n"
+	}
+	return string
+}
+
+function adjustRows() {
+	for (let i = 25; i < canvas.height; i += 25) {
+		for (let j = 0; j < words.length; j++) {
+			for (let k = 0; k < words[j].length; k++) {
+				if (words[j][k].y < i + 25 && words[j][k].y >= i - 25) {
+					if (i%50 != 0 && j % 2 == 0) {words[j][k].y = i}
+					else if (i%50 == 0 && j%2 != 0){words[j][k].y = i}
+				}
+			}
+		}
+	}
+	drawCanvas()
+}
+
+function handleRefresh() {
+	adjustRows()
+	reorderWordArray()
+	
+	let textDiv = document.getElementById("text-area")
+	document.getElementById("text-area").innerHTML = ""	//clear existing lyrics in HTML
+	if (words) {
+		let lyrics = simpleParseLyrics(wordArrayToString())
+		for (let i = 0; i < lyrics.length; i ++) {
+			textDiv.innerHTML = textDiv.innerHTML + `<p>${lyrics[i]}</p>` //add the line to the HTML
+		}
+	}
+}
+
+function handleSaveAs() {
+	let userText = $('#userTextField').val(); //get text from user text input field
+	let textDiv = document.getElementById("text-area")
+	if (userText && userText != '' && words != []) { //user text and canvas was not empty
+		let userRequestObj = {text: userText, content: textDiv.innerText, request: "Save"} //make object to send to server
+		
+		let userRequestJSON = JSON.stringify(userRequestObj) //make JSON string
+		$('#userTextField').val('') //clear the user text field
+		$.post("userText", userRequestJSON, function(data, status) {
+			console.log("Successful send of writing..")
+		})
+	}
+}
+		
 
 $(document).ready(function() {
 	
@@ -307,4 +434,4 @@ $(document).ready(function() {
 	$("#canvas1").mousedown(handleMouseDown)
 
 	drawCanvas()
-})			
+})
